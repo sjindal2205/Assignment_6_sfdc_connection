@@ -34,7 +34,7 @@ payload]]></ee:set-payload>
 	email_id : payload.Email
 }]]]></salesforce:parameters>
 					</salesforce:query>
-					<logger level="INFO" doc:name="Logger" doc:id="02b8e83a-582a-47fb-ac7b-15a36bbc59b5" message='#["\n exists value returned: " ++ vars.exists as String ++ "\n EMAIL with ID: " ++ payload.Email ++  " exists: " ++ vars.exists as String]'/>
+					<logger level="INFO" doc:name="Logger" doc:id="02b8e83a-582a-47fb-ac7b-15a36bbc59b5" message='#["\n exists value returned: " ++ vars.exists as String ++ "\n EMAIL with ID: " ++ payload.Email ++  " exists: " ++ vars.exists as String ++ "\n"]'/>
 				</batch:step>
 				<batch:step name="writeToSalesforce" doc:id="6b48d948-768b-480f-9cee-db97461fed2d" acceptExpression="#[not vars.exists]">
 					<ee:transform doc:name="Map Contact records" doc:id="67d99b63-927e-44e5-9b8d-c079f5b8241e" >
@@ -59,16 +59,19 @@ output application/java
 						</ee:message>
 					</ee:transform>
 					<batch:aggregator doc:name="Batch Aggregator" doc:id="1d006860-f074-4fd8-b56b-15b74bf8f294" size="2">
+						<logger level="INFO" doc:name="Logger" doc:id="bcd698ba-e5b3-4ad9-8805-560d3bd15bbd" message='#["\n\n This Aggregator sends the record in a batch of 2 \n"]' />
 						<salesforce:create type="Contact" doc:name="Create" doc:id="9ba8d215-6790-4ca9-8491-503d58071120" config-ref="Salesforce_Config"/>
 						<ee:transform doc:name="Transform Message" doc:id="ac625810-0a31-4a8e-ac54-e650e314c7d9" >
 							<ee:message >
 								<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+{
+	"id": payload.id,
+	"Successfully_inserted": payload.success
+}]]></ee:set-payload>
 							</ee:message>
 						</ee:transform>
-						<logger level="INFO" doc:name="Logger" doc:id="bcd698ba-e5b3-4ad9-8805-560d3bd15bbd" message='#["\n\n This Aggregator sends the record in a batch of 2"]'/>
 					</batch:aggregator>
 				</batch:step>
 			</batch:process-records>
