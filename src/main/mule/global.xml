@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="03a41eea-0a00-42a9-b2c7-522ae744ede3" >
+		<file:connection workingDir="C:\Users\surjinda\AnypointStudio\MuleWorkspace\assignment_6_connect_sfdc\src\main\resources" />
+	</file:config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="a4894162-5342-4691-8ddb-dc8912dcfa73" >
+		<salesforce:cached-basic-connection username="surabhi.jindal@publicissapient.com" password="killdemol22" securityToken="Y5uiQtfkIcOTAv9pSnZqe4b1L" />
+	</salesforce:sfdc-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="23948a81-678c-4699-aa31-c87ebc3b0529" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+</mule>

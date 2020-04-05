@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="assignment_6_connect_sfdcFlow" doc:id="88dd3e36-9370-419d-b2dd-0b7c61f20e27">
+		<file:listener doc:name="On New or Updated File" doc:id="ce639d81-5307-40af-b76e-2f691cc6d137" config-ref="File_Config" directory="input">
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="HOURS" />
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.csv" />
+		</file:listener>
+		<ee:transform doc:name="CSV to JSON" doc:id="c405c939-48e6-442e-b7e8-81aef5052272" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="SyncWithSalesforce" doc:id="8e18e789-be52-4a99-bcca-e7e9afb4c3bf" >
+			<batch:process-records >
+				<batch:step name="isContactPresentInSalesforce" doc:id="154ace68-dad6-4e18-9fe7-619dc2a7f925" >
+					<salesforce:query doc:name="isEmailPresent" doc:id="341e3d1c-f114-489c-ac96-f3590cbe86ef" config-ref="Salesforce_Config" target="exists" targetValue="#[sizeOf(payload) &gt; 0]">
+						<salesforce:salesforce-query >Select Email from Contact where Email = ':email_id'</salesforce:salesforce-query>
+						<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	email_id : payload.Email
+}]]]></salesforce:parameters>
+					</salesforce:query>
+					<logger level="INFO" doc:name="Logger" doc:id="02b8e83a-582a-47fb-ac7b-15a36bbc59b5" message='#["\n exists value returned: " ++ vars.exists as String ++ "\n EMAIL with ID: " ++ payload.Email ++  " exists: " ++ vars.exists as String]'/>
+				</batch:step>
+				<batch:step name="writeToSalesforce" doc:id="6b48d948-768b-480f-9cee-db97461fed2d" acceptExpression="#[not vars.exists]">
+					<ee:transform doc:name="Map Contact records" doc:id="67d99b63-927e-44e5-9b8d-c079f5b8241e" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	LastName: payload.LastName,
+	FirstName: payload.FirstName,
+	Email: payload.Email,
+	MailingCity: payload.Address_City,
+	MailingPostalCode: payload.ZIP_or_PostalCode,
+	MailingCountry: payload.Country_or_Region,
+	Fax: payload.Fax,
+	MobilePhone: payload.Mobile_phone,
+	Phone: payload.Office_Phone,
+	Title: payload.Job_Title,
+	Department: payload.Department,
+	OtherPhone: payload.Office_Number
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="1d006860-f074-4fd8-b56b-15b74bf8f294" size="2">
+						<salesforce:create type="Contact" doc:name="Create" doc:id="9ba8d215-6790-4ca9-8491-503d58071120" config-ref="Salesforce_Config"/>
+						<ee:transform doc:name="Transform Message" doc:id="ac625810-0a31-4a8e-ac54-e650e314c7d9" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="bcd698ba-e5b3-4ad9-8805-560d3bd15bbd" message='#["\n\n This Aggregator sends the record in a batch of 2"]'/>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="da432d9e-af59-4059-96ba-0a027edf2f5c" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>

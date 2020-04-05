@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="account_csv" format="csv">
+      <types:shape format="weave" example="input/Account.csv"><![CDATA[%dw 2.0
+
+type account_csv = Array<{|  ID: String,   UserName: String,   FirstName: String,   LastName: String,   Display_name: String,   Job_Title: String,   Department: String,   Office_Number: String,   Office_Phone: String,   Mobile_phone: String,   Fax: String,   Address_City: String,   ZIP_or_PostalCode: String,   Country_or_Region: String,   Email: String|}>
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#3e0bc74b-c8b6-4cf2-86c3-9e8fff337103">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="account_csv"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#67d99b63-927e-44e5-9b8d-c079f5b8241e">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="account_csv"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#30d39117-19c4-4d73-98da-95a9be4b36b9">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="account_csv"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#e453cc97-6f90-422b-a920-a89eb494698f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="account_csv"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#c405c939-48e6-442e-b7e8-81aef5052272">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="account_csv"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
